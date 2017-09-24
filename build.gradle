@@ -1,35 +1,51 @@
 buildscript {
-	ext {
-		springBootVersion = '1.5.7.RELEASE'
-	}
-	repositories {
-		mavenCentral()
-	}
-	dependencies {
-		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
-	}
+    ext {
+        springBootVersion = '1.5.7.RELEASE'
+    }
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+        classpath('org.junit.platform:junit-platform-gradle-plugin:1.0.0')
+
+    }
 }
 
 apply plugin: 'java'
 apply plugin: 'idea'
 apply plugin: 'eclipse'
 apply plugin: 'org.springframework.boot'
+apply plugin: 'org.junit.platform.gradle.plugin'
+
 
 group = 'io.yac.flight'
 version = '0.0.1-SNAPSHOT'
 sourceCompatibility = 1.8
 
 repositories {
-	mavenCentral()
+    mavenCentral()
 }
 
+junitPlatform {
+    logManager 'org.apache.logging.log4j.jul.LogManager'
+}
 
 dependencies {
-	compile('org.springframework.boot:spring-boot-starter-actuator')
-	compile('org.springframework.boot:spring-boot-actuator-docs')
-	compile('org.springframework.boot:spring-boot-starter-hateoas')
-	compile('org.springframework.boot:spring-boot-starter-web')
+    compile('org.springframework.boot:spring-boot-starter-actuator')
+    compile('org.springframework.boot:spring-boot-actuator-docs')
+    compile('org.springframework.boot:spring-boot-starter-hateoas')
+    compile('org.springframework.boot:spring-boot-starter-web')
     compile('com.google.apis:google-api-services-qpxExpress:v1-rev25-1.22.0')
+    testCompile("org.junit.jupiter:junit-jupiter-api:5.0.0")
+    testRuntime("org.junit.jupiter:junit-jupiter-engine:5.0.0")
+    testRuntime("org.junit.jupiter:junit-jupiter-params:5.0.0")
     testCompile('org.springframework.boot:spring-boot-starter-test')
-	testCompile('org.springframework.restdocs:spring-restdocs-mockmvc')
+    testCompile('org.springframework.restdocs:spring-restdocs-mockmvc')
+
+    // Only needed to run tests in an IntelliJ IDEA that bundles an older version
+    testRuntime("org.junit.platform:junit-platform-launcher:1.0.0")
+    testRuntime("org.junit.jupiter:junit-jupiter-engine:5.0.0")
+    testRuntime("org.junit.vintage:junit-vintage-engine:4.12.0")
+
 }
