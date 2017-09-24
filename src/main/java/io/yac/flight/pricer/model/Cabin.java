@@ -3,12 +3,14 @@ package io.yac.flight.pricer.model;
 import java.util.Arrays;
 
 public enum Cabin {
-    ECONOMY("COACH"), PREMIUM("PREMIUM_COACH"), BUSINESS("BUSINESS"), FIRST("FIRST");
+    ECONOMY("COACH", "COACH"), PREMIUM("PREMIUM_COACH", "PREMIUM"), BUSINESS("BUSINESS", "BUSINESS"), FIRST("FIRST", "FIRST");
 
     private final String qpxValue;
+    private final String externalValue;
 
-    Cabin(String qpxValue) {
+    Cabin(String qpxValue, String externalValue) {
         this.qpxValue = qpxValue;
+        this.externalValue = externalValue;
     }
 
     public static Cabin fromQpxResponse(String cabin) {
@@ -18,5 +20,9 @@ public enum Cabin {
 
     String getQpxValue() {
         return qpxValue;
+    }
+
+    public String getExternalValue() {
+        return externalValue;
     }
 }

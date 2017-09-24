@@ -9,7 +9,7 @@ import com.google.api.services.qpxExpress.QPXExpressRequestInitializer;
 import com.google.api.services.qpxExpress.model.*;
 import io.yac.flight.pricer.exceptions.DependentServiceException;
 import io.yac.flight.pricer.model.*;
-import io.yac.flight.pricer.web.model.FlightSearchCriteria;
+import io.yac.flight.pricer.web.resources.FlightSearchCriteria;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -118,15 +118,20 @@ public class QPXClient implements SearchFlightService {
     private List<Solution> buildSolutions(TripsSearchResponse response) {
         List<Solution> solutions = new ArrayList<>(response.getTrips().getTripOption().size());
 
+        long solutionCounter = 1L;
+
         for (TripOption tripOption : response.getTrips().getTripOption()) {
             Solution solution = new Solution();
             solution.setPrice(tripOption.getSaleTotal());
+            solution.setId(solutionCounter++);
 
             List<Slice> slices = new ArrayList<>(tripOption.getSlice().size());
-
+            long sliceCounter = 1L;
             for (SliceInfo sliceInfo : tripOption.getSlice()) {
                 Slice slice = new Slice();
-                sliceInfo.setDuration(sliceInfo.getDuration());
+                slice.setId(1L);
+                slice.setDuration(sliceInfo.getDuration());
+                long segmentCounter = 1L;
                 for (SegmentInfo segmentInfo : sliceInfo.getSegment()) {
                     Segment segment = new Segment();
                     segment.setBookingCode(segmentInfo.getBookingCode());
@@ -136,10 +141,13 @@ public class QPXClient implements SearchFlightService {
                     segment.setFlightNumber(segmentInfo.getFlight().getNumber());
                     segment.setMarriedSegmentGroup(segmentInfo.getMarriedSegmentGroup());
                     segment.setConnectionDuration(segmentInfo.getConnectionDuration());
+                    segment.setId(segmentCounter++);
 
                     List<Leg> legs = new ArrayList<>();
+                    long legCounter = 1L;
                     for (LegInfo legInfo : segmentInfo.getLeg()) {
                         Leg leg = new Leg();
+                        leg.setId(legCounter++);
                         leg.setAircraft(legInfo.getAircraft());
                         leg.setOrigin(legInfo.getOrigin());
                         leg.setDestination(legInfo.getDestination());

@@ -3,41 +3,66 @@ package io.yac.flight.pricer.model;
 import java.time.LocalDate;
 
 public class SliceSearchCriteria {
-    private String origin;
-    private String destination;
-    private String cabin;
-
+    private final String origin;
+    private final String destination;
+    private final String cabin;
     private LocalDate departureDate;
+
+    private SliceSearchCriteria(String origin, String destination, String cabin, LocalDate departureDate) {
+        this.origin = origin;
+        this.destination = destination;
+        this.cabin = cabin;
+        this.departureDate = departureDate;
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
 
     public String getOrigin() {
         return origin;
-    }
-
-    public void setOrigin(String origin) {
-        this.origin = origin;
     }
 
     public String getDestination() {
         return destination;
     }
 
-    public void setDestination(String destination) {
-        this.destination = destination;
-    }
-
     public String getCabin() {
         return cabin;
-    }
-
-    public void setCabin(String cabin) {
-        this.cabin = cabin;
     }
 
     public LocalDate getDepartureDate() {
         return departureDate;
     }
 
-    public void setDepartureDate(LocalDate departureDate) {
-        this.departureDate = departureDate;
+    public static class Builder {
+        private String origin;
+        private String destination;
+        private String cabin;
+        private LocalDate departureDate;
+
+        public Builder origin(String origin) {
+            this.origin = origin;
+            return this;
+        }
+
+        public Builder destination(String destination) {
+            this.destination = destination;
+            return this;
+        }
+
+        public Builder cabin(String cabin) {
+            this.cabin = cabin;
+            return this;
+        }
+
+        public Builder departureDate(LocalDate departureDate) {
+            this.departureDate = departureDate;
+            return this;
+        }
+
+        public SliceSearchCriteria build() {
+            return new SliceSearchCriteria(origin, destination, cabin, departureDate);
+        }
     }
 }

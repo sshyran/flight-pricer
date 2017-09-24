@@ -4,6 +4,8 @@ import java.time.LocalDateTime;
 
 public class Leg {
 
+    private Long id;
+
     private String aircraft;
 
     private LocalDateTime localArrivalTime;
@@ -92,5 +94,13 @@ public class Leg {
 
     public void setChangePlane(boolean changePlane) {
         this.changePlane = changePlane;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 }

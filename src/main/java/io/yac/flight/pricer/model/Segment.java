@@ -4,6 +4,8 @@ import java.util.List;
 
 public class Segment {
 
+    private Long id;
+
     private Integer duration;
 
     private String carrierIATA;
@@ -92,5 +94,13 @@ public class Segment {
 
     public void setConnectionDuration(Integer connectionDuration) {
         this.connectionDuration = connectionDuration;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 }
