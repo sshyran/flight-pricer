@@ -3,15 +3,18 @@ package io.yac.flight.pricer.qpx;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
+import com.google.api.client.json.JsonParser;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.qpxExpress.QPXExpress;
 import com.google.api.services.qpxExpress.QPXExpressRequestInitializer;
 import com.google.api.services.qpxExpress.model.*;
 import io.yac.flight.pricer.exceptions.DependentServiceException;
 import io.yac.flight.pricer.model.*;
+import io.yac.flight.pricer.repository.QpxCacheRepository;
 import io.yac.flight.pricer.web.resources.FlightSearchCriteria;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +23,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class QPXClient implements SearchFlightService {
@@ -29,13 +33,20 @@ public class QPXClient implements SearchFlightService {
     private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
 
     private final HttpTransport httpTransport;
+    private final QpxCacheRepository qpxCacheRepository;
 
     @Value("${google.api.applicationName}")
     private String applicationName;
     @Value("${google.api.key}")
     private String apiKey;
 
-    public QPXClient() throws Exception {
+    @Value("${google.api.cachingEnabled}")
+    private boolean qpxCachingEnabled;
+
+
+    @Autowired
+    public QPXClient(QpxCacheRepository qpxCacheRepository) throws Exception {
+        this.qpxCacheRepository = qpxCacheRepository;
         httpTransport = GoogleNetHttpTransport.newTrustedTransport();
     }
 
@@ -71,7 +82,7 @@ public class QPXClient implements SearchFlightService {
                         .setGoogleClientRequestInitializer(new QPXExpressRequestInitializer(apiKey)).build();
 
         try {
-            TripsSearchResponse response = qpxExpress.trips().search(tripsSearchRequest).execute();
+            TripsSearchResponse response = callService(tripsSearchRequest, qpxExpress);
 
             List<Solution> solutions = buildSolutions(response);
 
@@ -85,6 +96,38 @@ public class QPXClient implements SearchFlightService {
             throw new DependentServiceException(e);
         }
 
+    }
+
+    private TripsSearchResponse callService(TripsSearchRequest tripsSearchRequest, QPXExpress qpxExpress)
+            throws IOException {
+        if (qpxCachingEnabled) {
+            Optional<QpxCache> byRequestHash = qpxCacheRepository.findByRequestHash(tripsSearchRequest.hashCode());
+            if (byRequestHash.isPresent()) {
+                JsonParser jsonParser = JSON_FACTORY.createJsonParser(byRequestHash.get().getRequestJson());
+                return jsonParser.parse(TripsSearchResponse.class);
+            } else {
+                TripsSearchResponse response = qpxExpress.trips().search(tripsSearchRequest).execute();
+                try {
+                    response.setFactory(JSON_FACTORY);
+                    tripsSearchRequest.setFactory(JSON_FACTORY);
+
+                    QpxCache cache = new QpxCache();
+                    cache.setRequestHash(tripsSearchRequest.hashCode());
+                    cache.setResponseJson(response.toPrettyString());
+                    cache.setRequestJson(tripsSearchRequest.toPrettyString());
+                    qpxCacheRepository.save(cache);
+
+                } catch (Throwable t) {
+                    LOG.info("Throwable while saving cached value for" + tripsSearchRequest, t);
+                }
+                return response;
+
+            }
+
+
+        } else {
+            return qpxExpress.trips().search(tripsSearchRequest).execute();
+        }
     }
 
     private List<City> buildCities(List<CityData> citiesData) {

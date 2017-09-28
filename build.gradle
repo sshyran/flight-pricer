@@ -38,6 +38,8 @@ dependencies {
     compile('org.springframework.boot:spring-boot-starter-web')
     compile('com.google.apis:google-api-services-qpxExpress:v1-rev25-1.22.0')
     compile('com.fasterxml.jackson.datatype:jackson-datatype-jsr310')
+    compile('org.springframework.boot:spring-boot-starter-data-jpa')
+    runtime('org.postgresql:postgresql')
     testCompile("org.junit.jupiter:junit-jupiter-api:5.0.0")
     testRuntime("org.junit.jupiter:junit-jupiter-engine:5.0.0")
     testRuntime("org.junit.jupiter:junit-jupiter-params:5.0.0")
