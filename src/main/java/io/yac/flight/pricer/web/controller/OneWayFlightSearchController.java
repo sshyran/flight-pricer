@@ -37,13 +37,14 @@ public class OneWayFlightSearchController {
     @CrossOrigin(origins = frontEndAppUrl)
     public OneWayFlightSearchResponse search(@RequestParam("departure") String departureAirport,
                                              @RequestParam("arrival") String arrivalAirport,
-                                             @RequestParam("departureDate") String date) {
+                                             @RequestParam("departureDate") String date,
+                                             @RequestParam("adultCount") Integer adultCount) {
 
         LocalDate departureDate = LocalDate.parse(date, DateTimeFormatter.ISO_DATE);
         final FlightSearchCriteria searchCriteria = FlightSearchCriteria.builder().addSlice(
                 SliceSearchCriteria.builder().origin(departureAirport).destination(arrivalAirport)
                         .departureDate(departureDate)
-                        .build()).build();
+                        .build()).adultCount(adultCount).build();
 
         final QPXResponse qpxResponse = queryService(searchCriteria);
 

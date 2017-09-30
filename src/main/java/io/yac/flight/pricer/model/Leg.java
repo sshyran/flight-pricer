@@ -92,8 +92,8 @@ public class Leg {
         return changePlane;
     }
 
-    public void setChangePlane(boolean changePlane) {
-        this.changePlane = changePlane;
+    public void setChangePlane(Boolean changePlane) {
+        this.changePlane = changePlane == null ? false : changePlane;
     }
 
     public Long getId() {

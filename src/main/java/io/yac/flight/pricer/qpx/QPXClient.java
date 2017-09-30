@@ -103,7 +103,7 @@ public class QPXClient implements SearchFlightService {
         if (qpxCachingEnabled) {
             Optional<QpxCache> byRequestHash = qpxCacheRepository.findByRequestHash(tripsSearchRequest.hashCode());
             if (byRequestHash.isPresent()) {
-                JsonParser jsonParser = JSON_FACTORY.createJsonParser(byRequestHash.get().getRequestJson());
+                JsonParser jsonParser = JSON_FACTORY.createJsonParser(byRequestHash.get().getResponseJson());
                 return jsonParser.parse(TripsSearchResponse.class);
             } else {
                 TripsSearchResponse response = qpxExpress.trips().search(tripsSearchRequest).execute();
@@ -113,8 +113,8 @@ public class QPXClient implements SearchFlightService {
 
                     QpxCache cache = new QpxCache();
                     cache.setRequestHash(tripsSearchRequest.hashCode());
-                    cache.setResponseJson(response.toPrettyString());
-                    cache.setRequestJson(tripsSearchRequest.toPrettyString());
+                    cache.setResponseJson(response.toString());
+                    cache.setRequestJson(tripsSearchRequest.toString());
                     qpxCacheRepository.save(cache);
 
                 } catch (Throwable t) {
