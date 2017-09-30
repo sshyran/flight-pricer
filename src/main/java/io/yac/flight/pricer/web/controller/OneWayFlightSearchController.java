@@ -13,6 +13,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @RestController
@@ -38,7 +39,7 @@ public class OneWayFlightSearchController {
     public OneWayFlightSearchResponse search(@RequestParam("departure") String departureAirport,
                                              @RequestParam("arrival") String arrivalAirport,
                                              @RequestParam("departureDate") String date,
-                                             @RequestParam("adultCount") Integer adultCount) {
+                                             @RequestParam("numberOfAdult") Integer adultCount) {
 
         LocalDate departureDate = LocalDate.parse(date, DateTimeFormatter.ISO_DATE);
         final FlightSearchCriteria searchCriteria = FlightSearchCriteria.builder().addSlice(
@@ -68,11 +69,11 @@ public class OneWayFlightSearchController {
 
             List<Solution> solutions = new ArrayList<>();
             Solution solution = new Solution();
-            solution.setPrice("USD1234");
+            solution.setPrices(Arrays.asList(Price.builder().amount(1234.0).country("US").currency("USD").build(),
+                    Price.builder().amount(2902.3).country("FR").currency("EUR").build()));
             solution.setRefundable(false);
             List<Slice> slices = new ArrayList<>();
             Slice slice = new Slice();
-            slice.setId(1L);
 
             Segment segment = new Segment();
             segment.setCarrierIATA("AF");
@@ -83,7 +84,6 @@ public class OneWayFlightSearchController {
             segment.setDuration(120);
             segment.setFlightNumber("AF183");
             segment.setBookingCode("ABCD");
-            segment.setId(1L);
 
             List<Leg> legs = new ArrayList<>();
             Leg leg = new Leg();
@@ -96,14 +96,12 @@ public class OneWayFlightSearchController {
             leg.setLocalDepartureTime(LocalDateTime.now());
             leg.setLocalArrivalTime(LocalDateTime.now().plusMinutes(120L));
             leg.setConnectionDuration(0);
-            leg.setId(1L);
 
             legs.add(leg);
             segment.setLegs(legs);
             slice.addSegment(segment);
             slices.add(slice);
             solution.setSlices(slices);
-            solution.setId(1L);
 
 
             solutions.add(solution);

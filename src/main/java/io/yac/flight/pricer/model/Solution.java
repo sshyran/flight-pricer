@@ -1,22 +1,32 @@
 package io.yac.flight.pricer.model;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class Solution {
-    private Long id;
+    private final String id;
 
-    private String price;
+    private List<Price> prices = new ArrayList<>();
 
     private List<Slice> slices;
 
     private boolean isRefundable;
 
-    public String getPrice() {
-        return price;
+    public Solution() {
+        this.id = UUID.randomUUID().toString();
     }
 
-    public void setPrice(String price) {
-        this.price = price;
+    public List<Price> getPrices() {
+        return prices;
+    }
+
+    public void setPrices(List<Price> prices) {
+        this.prices = prices;
+    }
+
+    public void addPrice(Price price) {
+        this.prices.add(price);
     }
 
     public List<Slice> getSlices() {
@@ -35,11 +45,8 @@ public class Solution {
         isRefundable = refundable;
     }
 
-    public Long getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
 }

@@ -3,15 +3,17 @@ package io.yac.flight.pricer.model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class Slice {
-    private Long id;
+    private final String id;
 
     private List<Segment> segments;
     private Integer duration;
 
     public Slice() {
         this.segments = new ArrayList<>();
+        id = UUID.randomUUID().toString();
     }
 
     public void addSegment(Segment segment) {
@@ -26,13 +28,10 @@ public class Slice {
         this.segments = segments;
     }
 
-    public Long getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
 
     public void setDuration(Integer duration) {
         this.duration = duration;

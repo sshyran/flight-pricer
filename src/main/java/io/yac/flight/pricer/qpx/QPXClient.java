@@ -84,7 +84,7 @@ public class QPXClient implements SearchFlightService {
         try {
             TripsSearchResponse response = callService(tripsSearchRequest, qpxExpress);
 
-            List<Solution> solutions = buildSolutions(response);
+            List<Solution> solutions = buildSolutions(response, flightSearchCriteria.getTicketingCountry());
 
             Data data = response.getTrips().getData();
             return new QPXResponse(buildCarriers(data.getCarrier()), buildAirports(data.getAirport()),
@@ -158,23 +158,20 @@ public class QPXClient implements SearchFlightService {
         return carriers;
     }
 
-    private List<Solution> buildSolutions(TripsSearchResponse response) {
+    private List<Solution> buildSolutions(TripsSearchResponse response, String ticketingCountry) {
         List<Solution> solutions = new ArrayList<>(response.getTrips().getTripOption().size());
-
-        long solutionCounter = 1L;
 
         for (TripOption tripOption : response.getTrips().getTripOption()) {
             Solution solution = new Solution();
-            solution.setPrice(tripOption.getSaleTotal());
-            solution.setId(solutionCounter++);
+            String saleTotal = tripOption.getSaleTotal();
+
+            solution.addPrice(Price.builder().amount(Double.parseDouble(saleTotal.substring(3)))
+                    .currency(saleTotal.substring(0, 3)).country(ticketingCountry).build());
 
             List<Slice> slices = new ArrayList<>(tripOption.getSlice().size());
-            long sliceCounter = 1L;
             for (SliceInfo sliceInfo : tripOption.getSlice()) {
                 Slice slice = new Slice();
-                slice.setId(1L);
                 slice.setDuration(sliceInfo.getDuration());
-                long segmentCounter = 1L;
                 for (SegmentInfo segmentInfo : sliceInfo.getSegment()) {
                     Segment segment = new Segment();
                     segment.setBookingCode(segmentInfo.getBookingCode());
@@ -184,13 +181,10 @@ public class QPXClient implements SearchFlightService {
                     segment.setFlightNumber(segmentInfo.getFlight().getNumber());
                     segment.setMarriedSegmentGroup(segmentInfo.getMarriedSegmentGroup());
                     segment.setConnectionDuration(segmentInfo.getConnectionDuration());
-                    segment.setId(segmentCounter++);
 
                     List<Leg> legs = new ArrayList<>();
-                    long legCounter = 1L;
                     for (LegInfo legInfo : segmentInfo.getLeg()) {
                         Leg leg = new Leg();
-                        leg.setId(legCounter++);
                         leg.setAircraft(legInfo.getAircraft());
                         leg.setOrigin(legInfo.getOrigin());
                         leg.setDestination(legInfo.getDestination());
@@ -205,6 +199,7 @@ public class QPXClient implements SearchFlightService {
 
                         legs.add(leg);
                     }
+                    segment.setLegs(legs);
                     slice.addSegment(segment);
                 }
                 slices.add(slice);

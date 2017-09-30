@@ -1,10 +1,11 @@
 package io.yac.flight.pricer.model;
 
 import java.util.List;
+import java.util.UUID;
 
 public class Segment {
 
-    private Long id;
+    private final String id;
 
     private Integer duration;
 
@@ -23,6 +24,10 @@ public class Segment {
     private List<Leg> legs;
 
     private Integer connectionDuration;
+
+    public Segment() {
+        id = UUID.randomUUID().toString();
+    }
 
     public Integer getDuration() {
         return duration;
@@ -96,11 +101,9 @@ public class Segment {
         this.connectionDuration = connectionDuration;
     }
 
-    public Long getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+
 }

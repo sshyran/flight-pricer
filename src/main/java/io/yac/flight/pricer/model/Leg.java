@@ -1,10 +1,11 @@
 package io.yac.flight.pricer.model;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 public class Leg {
 
-    private Long id;
+    private final String id;
 
     private String aircraft;
 
@@ -23,6 +24,10 @@ public class Leg {
     private Integer connectionDuration;
 
     private boolean changePlane;
+
+    public Leg() {
+        this.id = UUID.randomUUID().toString();
+    }
 
     public String getAircraft() {
         return aircraft;
@@ -96,11 +101,8 @@ public class Leg {
         this.changePlane = changePlane == null ? false : changePlane;
     }
 
-    public Long getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
 }
