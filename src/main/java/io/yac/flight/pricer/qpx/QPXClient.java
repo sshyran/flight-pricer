@@ -11,7 +11,6 @@ import com.google.api.services.qpxExpress.model.*;
 import io.yac.flight.pricer.exceptions.DependentServiceException;
 import io.yac.flight.pricer.model.*;
 import io.yac.flight.pricer.repository.QpxCacheRepository;
-import io.yac.flight.pricer.web.resources.FlightSearchCriteria;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,9 +20,7 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class QPXClient implements SearchFlightService {
@@ -34,12 +31,10 @@ public class QPXClient implements SearchFlightService {
 
     private final HttpTransport httpTransport;
     private final QpxCacheRepository qpxCacheRepository;
-
     @Value("${google.api.applicationName}")
     private String applicationName;
     @Value("${google.api.key}")
     private String apiKey;
-
     @Value("${google.api.cachingEnabled}")
     private boolean qpxCachingEnabled;
 
@@ -48,18 +43,20 @@ public class QPXClient implements SearchFlightService {
     public QPXClient(QpxCacheRepository qpxCacheRepository) throws Exception {
         this.qpxCacheRepository = qpxCacheRepository;
         httpTransport = GoogleNetHttpTransport.newTrustedTransport();
+
+
     }
 
 
     @Override
-    public QPXResponse searchFlights(FlightSearchCriteria flightSearchCriteria) {
+    public QPXResponse searchFlights(QPXSearchCriteria searchCriteria, String ticketingCountry) {
         PassengerCounts passengerCounts = new PassengerCounts();
-        passengerCounts.setAdultCount(flightSearchCriteria.getAdultCount());
-        passengerCounts.setChildCount(flightSearchCriteria.getChildCount());
+        passengerCounts.setAdultCount(searchCriteria.getAdultCount());
+        passengerCounts.setChildCount(searchCriteria.getChildCount());
 
         List<SliceInput> slices = new ArrayList<>();
 
-        for (SliceSearchCriteria slice : flightSearchCriteria.getSlices()) {
+        for (QPXSliceSearchCriteria slice : searchCriteria.getSlices()) {
             SliceInput sliceInput = new SliceInput();
             sliceInput.setOrigin(slice.getOrigin());
             sliceInput.setDestination(slice.getDestination());
@@ -71,20 +68,17 @@ public class QPXClient implements SearchFlightService {
         TripOptionsRequest request = new TripOptionsRequest();
         request.setSlice(slices);
         request.setPassengers(passengerCounts);
-        request.setTicketingCountry(flightSearchCriteria.getTicketingCountry());
-        request.setSolutions(flightSearchCriteria.getMaximumSolutions());
+        request.setTicketingCountry(ticketingCountry);
+        request.setSolutions(searchCriteria.getMaximumSolutions());
+        request.setSaleCountry(ticketingCountry);
 
         TripsSearchRequest tripsSearchRequest = new TripsSearchRequest();
         tripsSearchRequest.setRequest(request);
 
-        QPXExpress qpxExpress =
-                new QPXExpress.Builder(httpTransport, JSON_FACTORY, null).setApplicationName(applicationName)
-                        .setGoogleClientRequestInitializer(new QPXExpressRequestInitializer(apiKey)).build();
 
         try {
-            TripsSearchResponse response = callService(tripsSearchRequest, qpxExpress);
-
-            List<Solution> solutions = buildSolutions(response, flightSearchCriteria.getTicketingCountry());
+            TripsSearchResponse response = callService(tripsSearchRequest);
+            List<Solution> solutions = buildSolutions(response, ticketingCountry);
 
             Data data = response.getTrips().getData();
             return new QPXResponse(buildCarriers(data.getCarrier()), buildAirports(data.getAirport()),
@@ -98,7 +92,7 @@ public class QPXClient implements SearchFlightService {
 
     }
 
-    private TripsSearchResponse callService(TripsSearchRequest tripsSearchRequest, QPXExpress qpxExpress)
+    private TripsSearchResponse callService(TripsSearchRequest tripsSearchRequest)
             throws IOException {
         if (qpxCachingEnabled) {
             Optional<QpxCache> byRequestHash = qpxCacheRepository.findByRequestHash(tripsSearchRequest.hashCode());
@@ -106,7 +100,7 @@ public class QPXClient implements SearchFlightService {
                 JsonParser jsonParser = JSON_FACTORY.createJsonParser(byRequestHash.get().getResponseJson());
                 return jsonParser.parse(TripsSearchResponse.class);
             } else {
-                TripsSearchResponse response = qpxExpress.trips().search(tripsSearchRequest).execute();
+                TripsSearchResponse response = qpxExpress().trips().search(tripsSearchRequest).execute();
                 try {
                     response.setFactory(JSON_FACTORY);
                     tripsSearchRequest.setFactory(JSON_FACTORY);
@@ -126,12 +120,17 @@ public class QPXClient implements SearchFlightService {
 
 
         } else {
-            return qpxExpress.trips().search(tripsSearchRequest).execute();
+            return qpxExpress().trips().search(tripsSearchRequest).execute();
         }
     }
 
-    private List<City> buildCities(List<CityData> citiesData) {
-        List<City> cities = new ArrayList<>(citiesData.size());
+    private QPXExpress qpxExpress() {
+        return new QPXExpress.Builder(httpTransport, JSON_FACTORY, null).setApplicationName(applicationName)
+                .setGoogleClientRequestInitializer(new QPXExpressRequestInitializer(apiKey)).build();
+    }
+
+    private Set<City> buildCities(List<CityData> citiesData) {
+        Set<City> cities = new HashSet<>(citiesData.size());
         for (CityData cityData : citiesData) {
             City city = new City(cityData.getCode(), cityData.getName(), cityData.getCountry());
             cities.add(city);
@@ -139,8 +138,8 @@ public class QPXClient implements SearchFlightService {
         return cities;
     }
 
-    private List<Airport> buildAirports(List<AirportData> airportsData) {
-        List<Airport> airports = new ArrayList<>(airportsData.size());
+    private Set<Airport> buildAirports(List<AirportData> airportsData) {
+        Set<Airport> airports = new HashSet<>(airportsData.size());
         for (AirportData airportData : airportsData) {
             Airport airport = new Airport(airportData.getCode(), airportData.getName(), airportData.getCity());
             airports.add(airport);
@@ -149,8 +148,8 @@ public class QPXClient implements SearchFlightService {
 
     }
 
-    private List<Carrier> buildCarriers(List<CarrierData> carriersData) {
-        List<Carrier> carriers = new ArrayList<>(carriersData.size());
+    private Set<Carrier> buildCarriers(List<CarrierData> carriersData) {
+        Set<Carrier> carriers = new HashSet<>(carriersData.size());
         for (CarrierData carrierData : carriersData) {
             Carrier carrier = new Carrier(carrierData.getCode(), carrierData.getName());
             carriers.add(carrier);

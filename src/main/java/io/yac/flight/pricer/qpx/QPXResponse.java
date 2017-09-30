@@ -6,34 +6,35 @@ import io.yac.flight.pricer.model.City;
 import io.yac.flight.pricer.model.Solution;
 
 import java.util.List;
+import java.util.Set;
 
 public class QPXResponse {
 
-    private final List<Carrier> carriers;
+    private final Set<Carrier> carriers;
 
-    private final List<Airport> airports;
+    private final Set<Airport> airports;
 
-    private final List<City> cities;
+    private final Set<City> cities;
 
     private final List<Solution> solutions;
 
-    public QPXResponse(List<Carrier> carriers, List<Airport> airports,
-                       List<City> cities, List<Solution> solutions) {
+    public QPXResponse(Set<Carrier> carriers, Set<Airport> airports,
+                       Set<City> cities, List<Solution> solutions) {
         this.carriers = carriers;
         this.airports = airports;
         this.cities = cities;
         this.solutions = solutions;
     }
 
-    public List<Carrier> getCarriers() {
+    public Set<Carrier> getCarriers() {
         return carriers;
     }
 
-    public List<Airport> getAirports() {
+    public Set<Airport> getAirports() {
         return airports;
     }
 
-    public List<City> getCities() {
+    public Set<City> getCities() {
         return cities;
     }
 

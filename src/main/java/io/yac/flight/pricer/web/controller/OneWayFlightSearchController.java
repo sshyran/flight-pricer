@@ -2,7 +2,7 @@ package io.yac.flight.pricer.web.controller;
 
 import io.yac.flight.pricer.model.*;
 import io.yac.flight.pricer.qpx.QPXResponse;
-import io.yac.flight.pricer.qpx.SearchFlightService;
+import io.yac.flight.pricer.search.MultiCountrySearchHandler;
 import io.yac.flight.pricer.web.resources.FlightSearchCriteria;
 import io.yac.flight.pricer.web.resources.OneWayFlightSearchResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,9 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 @RestController
 @RequestMapping("/api/oneWayFlightSearches")
@@ -23,13 +21,13 @@ public class OneWayFlightSearchController {
 
     private static final String frontEndAppUrl = "http://localhost:4200";
 
-    private final SearchFlightService searchFlightService;
-    @Value("#{'${google.api.enabled:false}'}")
+    private final MultiCountrySearchHandler searchFlightService;
 
+    @Value("#{'${google.api.enabled:false}'}")
     private boolean isCallingQpxEnabled;
 
     @Autowired
-    public OneWayFlightSearchController(SearchFlightService searchFlightService) {
+    public OneWayFlightSearchController(MultiCountrySearchHandler searchFlightService) {
         this.searchFlightService = searchFlightService;
     }
 
@@ -45,7 +43,8 @@ public class OneWayFlightSearchController {
         final FlightSearchCriteria searchCriteria = FlightSearchCriteria.builder().addSlice(
                 SliceSearchCriteria.builder().origin(departureAirport).destination(arrivalAirport)
                         .departureDate(departureDate)
-                        .build()).adultCount(adultCount).build();
+                        .build()).adultCount(adultCount)
+                .ticketingCountries(Arrays.asList("FR", "CA", "US", "CH", "NL", "GB")).build();
 
         final QPXResponse qpxResponse = queryService(searchCriteria);
 
@@ -59,13 +58,13 @@ public class OneWayFlightSearchController {
 
     private QPXResponse queryService(FlightSearchCriteria searchCriteria) {
         if (isCallingQpxEnabled) {
-            return searchFlightService.searchFlights(searchCriteria);
+            return searchFlightService.multiCountrySearch(searchCriteria);
         } else {
 
 
-            List<Carrier> carriers = new ArrayList<>();
-            List<Airport> airports = new ArrayList<>();
-            List<City> cities = new ArrayList<>();
+            Set<Carrier> carriers = new HashSet<>();
+            Set<Airport> airports = new HashSet<>();
+            Set<City> cities = new HashSet<>();
 
             List<Solution> solutions = new ArrayList<>();
             Solution solution = new Solution();

@@ -1,10 +1,12 @@
 package io.yac.flight.pricer.model;
 
+import java.util.Objects;
+
 public class Carrier {
 
-    private String iata;
+    private final String iata;
 
-    private String name;
+    private final String name;
 
     public Carrier(String iata, String name) {
 
@@ -16,15 +18,25 @@ public class Carrier {
         return iata;
     }
 
-    public void setIata(String iata) {
-        this.iata = iata;
-    }
-
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Carrier carrier = (Carrier) o;
+        return Objects.equals(iata, carrier.iata);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(iata);
     }
 }

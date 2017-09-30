@@ -11,16 +11,16 @@ public class FlightSearchCriteria {
     private final Integer adultCount;
     private final Integer childCount;
     private final List<SliceSearchCriteria> slices;
-    private final String ticketingCountry;
+    private final List<String> ticketingCountries;
     private final Integer maximumSolutions;
 
     private FlightSearchCriteria(Integer adultCount, Integer childCount,
-                                 List<SliceSearchCriteria> slices, String ticketingCountry,
+                                 List<SliceSearchCriteria> slices, List<String> ticketingCountries,
                                  Integer maximumSolutions) {
         this.adultCount = adultCount;
         this.childCount = childCount;
         this.slices = slices;
-        this.ticketingCountry = ticketingCountry;
+        this.ticketingCountries = ticketingCountries;
         this.maximumSolutions = maximumSolutions;
     }
 
@@ -40,8 +40,8 @@ public class FlightSearchCriteria {
         return slices;
     }
 
-    public String getTicketingCountry() {
-        return ticketingCountry;
+    public List<String> getTicketingCountries() {
+        return ticketingCountries;
     }
 
     public Integer getMaximumSolutions() {
@@ -52,7 +52,7 @@ public class FlightSearchCriteria {
         private Integer adultCount;
         private Integer childCount;
         private List<SliceSearchCriteria> slices = new ArrayList<>();
-        private String ticketingCountry;
+        private List<String> ticketingCountry;
         private Integer maximumSolutions;
 
         public Builder adultCount(Integer adultCount) {
@@ -70,7 +70,7 @@ public class FlightSearchCriteria {
             return this;
         }
 
-        public Builder ticketingCountry(String ticketingCountry) {
+        public Builder ticketingCountries(List<String> ticketingCountry) {
             this.ticketingCountry = ticketingCountry;
             return this;
         }

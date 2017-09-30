@@ -1,12 +1,13 @@
 package io.yac.flight.pricer.model;
 
+import java.util.Objects;
+
 public class Airport {
 
     private final String city;
-    private String name;
-    private String cityIataCode;
+    private final String name;
 
-    private String iata;
+    private final String iata;
 
     public Airport(String iata, String name, String city) {
 
@@ -19,23 +20,28 @@ public class Airport {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getCityIataCode() {
-        return cityIataCode;
-    }
-
-    public void setCityIataCode(String cityIataCode) {
-        this.cityIataCode = cityIataCode;
-    }
-
     public String getIata() {
         return iata;
     }
 
-    public void setIata(String iata) {
-        this.iata = iata;
+    public String getCity() {
+        return city;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Airport airport = (Airport) o;
+        return Objects.equals(iata, airport.iata);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(iata);
     }
 }
