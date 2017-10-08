@@ -1,5 +1,6 @@
 package io.yac.flight.pricer.search;
 
+import io.yac.flight.pricer.fx.FXRateClient;
 import io.yac.flight.pricer.model.*;
 import io.yac.flight.pricer.qpx.QPXClient;
 import io.yac.flight.pricer.qpx.QPXResponse;
@@ -8,7 +9,10 @@ import io.yac.flight.pricer.web.resources.FlightSearchCriteria;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.math.BigDecimal;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component
@@ -16,69 +20,71 @@ public class MultiCountrySearchHandler {
 
 
     private final QPXClient qpxClient;
+    private final SolutionMerger solutionMerger;
+    private final FXRateClient fxRateClient;
 
     @Autowired
-    public MultiCountrySearchHandler(QPXClient qpxClient) {
+    public MultiCountrySearchHandler(QPXClient qpxClient, SolutionMerger solutionMerger,
+                                     FXRateClient fxRateClient) {
         this.qpxClient = qpxClient;
+        this.solutionMerger = solutionMerger;
+        this.fxRateClient = fxRateClient;
     }
 
 
     public QPXResponse multiCountrySearch(FlightSearchCriteria searchCriteria) {
         final QPXSearchCriteria qpxSearchCriteria = QPXSearchCriteria.from(searchCriteria);
 
-        final List<QPXResponse> qpxResponses = searchCriteria.getTicketingCountries().parallelStream()
+        final List<QPXResponse> responseInAllCountries = searchCriteria.getTicketingCountries().parallelStream()
                 .map(country -> qpxClient.searchFlights(qpxSearchCriteria, country)).collect(
                         Collectors.toList());
 
 
-        Set<Carrier> dedupedCarrier = new HashSet<>();
-        qpxResponses.forEach(qpxResponse -> dedupedCarrier.addAll(qpxResponse.getCarriers()));
-        Set<Airport> dedupedAirports = new HashSet<>();
-        qpxResponses.forEach(qpxResponse -> dedupedAirports.addAll(qpxResponse.getAirports()));
-        Set<City> dedupedCities = new HashSet<>();
-        qpxResponses.forEach(qpxResponse -> dedupedCities.addAll(qpxResponse.getCities()));
+        Set<Carrier> dedupedCarrier = getUniqueCarriers(responseInAllCountries);
+        Set<Airport> dedupedAirports = getUniqueAirports(responseInAllCountries);
+        Set<City> dedupedCities = getUniqueCities(responseInAllCountries);
 
-        List<Solution> solutionWithPriceGroupedByCountry = flatten(
-                qpxResponses.stream().map(QPXResponse::getSolutions).collect(Collectors.toList()));
+        List<Solution> solutionWithPriceGroupedByCountry =
+                solutionMerger.mergeSolutionFromDifferentCountries(responseInAllCountries);
+
+        for (Solution solution : solutionWithPriceGroupedByCountry) {
+            for (Price price : solution.getPrices()) {
+                price.setRequestCurrency(searchCriteria.getCurrency().getCurrencyCode());
+                if (price.getCurrency().equals(searchCriteria.getCurrency().getCurrencyCode())) {
+                    price.setRequestCurrencyAmount(price.getAmount());
+
+                } else {
+                    BigDecimal rate =
+                            fxRateClient.getRate(price.getCurrency(), searchCriteria.getCurrency().getCurrencyCode());
+                    Double priceInSearchCurrency =
+                            rate.multiply(BigDecimal.valueOf(price.getAmount())).setScale(2, BigDecimal.ROUND_HALF_UP)
+                                    .doubleValue();
+                    price.setRequestCurrencyAmount(priceInSearchCurrency);
+                }
+            }
+        }
 
         return new QPXResponse(dedupedCarrier, dedupedAirports, dedupedCities, solutionWithPriceGroupedByCountry);
 
     }
 
-    private List<Solution> flatten(List<List<Solution>> solutionsListList) {
-        Map<String, List<Solution>> solutionMap = new HashMap<>();
-
-        for (List<Solution> solutions : solutionsListList) {
-            for (Solution solution : solutions) {
-                String uniqueFlightIdentifiers = buildUniqueFlightIdentifiers(solution);
-                if (!solutionMap.containsKey(uniqueFlightIdentifiers)) {
-                    solutionMap.put(uniqueFlightIdentifiers, new ArrayList<>());
-                }
-                solutionMap.get(uniqueFlightIdentifiers).add(solution);
-            }
-        }
-
-        List<Solution> flattenSolution = new ArrayList<>();
-
-        for (Map.Entry<String, List<Solution>> solutionMapEntry : solutionMap.entrySet()) {
-            List<Price> priceForCurrentSolution = new ArrayList<>();
-            for (Solution solution : solutionMapEntry.getValue()) {
-                priceForCurrentSolution.addAll(solution.getPrices());
-            }
-            Solution solution = solutionMapEntry.getValue().get(0);
-            solution.setPrices(new ArrayList<>());
-            solution.setPrices(priceForCurrentSolution);
-            flattenSolution.add(solution);
-        }
-
-        return flattenSolution;
+    private Set<City> getUniqueCities(List<QPXResponse> responseInAllCountries) {
+        Set<City> dedupedCities = new HashSet<>();
+        responseInAllCountries.forEach(qpxResponse -> dedupedCities.addAll(qpxResponse.getCities()));
+        return dedupedCities;
     }
 
-    private String buildUniqueFlightIdentifiers(Solution solution) {
-        StringBuilder uniqueFlightIdentifierBuilder = new StringBuilder();
-        solution.getSlices().forEach(slice -> slice.getSegments()
-                .forEach(segment -> uniqueFlightIdentifierBuilder.append(segment.getCarrierIATA())
-                        .append(segment.getNumber())));
-        return uniqueFlightIdentifierBuilder.toString();
+    private Set<Airport> getUniqueAirports(List<QPXResponse> responseInAllCountries) {
+        Set<Airport> dedupedAirports = new HashSet<>();
+        responseInAllCountries.forEach(qpxResponse -> dedupedAirports.addAll(qpxResponse.getAirports()));
+        return dedupedAirports;
     }
+
+    private Set<Carrier> getUniqueCarriers(List<QPXResponse> responseInAllCountries) {
+        Set<Carrier> dedupedCarrier = new HashSet<>();
+        responseInAllCountries.forEach(qpxResponse -> dedupedCarrier.addAll(qpxResponse.getCarriers()));
+        return dedupedCarrier;
+    }
+
+
 }

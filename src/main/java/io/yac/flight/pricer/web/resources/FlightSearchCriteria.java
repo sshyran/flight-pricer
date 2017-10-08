@@ -3,6 +3,7 @@ package io.yac.flight.pricer.web.resources;
 import io.yac.flight.pricer.model.SliceSearchCriteria;
 
 import java.util.ArrayList;
+import java.util.Currency;
 import java.util.List;
 
 public class FlightSearchCriteria {
@@ -13,15 +14,17 @@ public class FlightSearchCriteria {
     private final List<SliceSearchCriteria> slices;
     private final List<String> ticketingCountries;
     private final Integer maximumSolutions;
+    private final Currency currency;
 
     private FlightSearchCriteria(Integer adultCount, Integer childCount,
                                  List<SliceSearchCriteria> slices, List<String> ticketingCountries,
-                                 Integer maximumSolutions) {
+                                 Integer maximumSolutions, String currency) {
         this.adultCount = adultCount;
         this.childCount = childCount;
         this.slices = slices;
         this.ticketingCountries = ticketingCountries;
         this.maximumSolutions = maximumSolutions;
+        this.currency = Currency.getInstance(currency);
     }
 
     public static Builder builder() {
@@ -48,12 +51,17 @@ public class FlightSearchCriteria {
         return maximumSolutions;
     }
 
+    public Currency getCurrency() {
+        return currency;
+    }
+
     public static class Builder {
         private Integer adultCount;
         private Integer childCount;
         private List<SliceSearchCriteria> slices = new ArrayList<>();
         private List<String> ticketingCountry;
         private Integer maximumSolutions;
+        private String currency;
 
         public Builder adultCount(Integer adultCount) {
             this.adultCount = adultCount;
@@ -80,8 +88,14 @@ public class FlightSearchCriteria {
             return this;
         }
 
+        public Builder currency(String currency) {
+            this.currency = currency;
+            return this;
+        }
+
         public FlightSearchCriteria build() {
-            return new FlightSearchCriteria(adultCount, childCount, slices, ticketingCountry, maximumSolutions);
+            return new FlightSearchCriteria(adultCount, childCount, slices, ticketingCountry, maximumSolutions,
+                    currency);
         }
     }
 }

@@ -37,14 +37,15 @@ public class OneWayFlightSearchController {
     public OneWayFlightSearchResponse search(@RequestParam("departure") String departureAirport,
                                              @RequestParam("arrival") String arrivalAirport,
                                              @RequestParam("departureDate") String date,
-                                             @RequestParam("numberOfAdult") Integer adultCount) {
+                                             @RequestParam("numberOfAdult") Integer adultCount,
+                                             @RequestParam(name = "currency", defaultValue = "EUR") String currency) {
 
         LocalDate departureDate = LocalDate.parse(date, DateTimeFormatter.ISO_DATE);
         final FlightSearchCriteria searchCriteria = FlightSearchCriteria.builder().addSlice(
                 SliceSearchCriteria.builder().origin(departureAirport).destination(arrivalAirport)
                         .departureDate(departureDate)
                         .build()).adultCount(adultCount)
-                .ticketingCountries(Arrays.asList("FR", "CA", "US", "CH", "NL", "GB")).build();
+                .ticketingCountries(Arrays.asList("FR", "CA", "US", "CH", "NL", "GB")).currency(currency).build();
 
         final QPXResponse qpxResponse = queryService(searchCriteria);
 

@@ -25,6 +25,10 @@ sourceCompatibility = 1.8
 
 repositories {
     mavenCentral()
+    maven {
+        url "https://packagecloud.io/yacio/releases/maven2"
+    }
+
 }
 
 junitPlatform {
@@ -32,6 +36,7 @@ junitPlatform {
 }
 
 dependencies {
+    compile('io.yac:ecb-rate-client:1.0.1')
     compile('org.springframework.boot:spring-boot-starter-actuator')
     compile('org.springframework.boot:spring-boot-actuator-docs')
     compile('org.springframework.boot:spring-boot-starter-hateoas')

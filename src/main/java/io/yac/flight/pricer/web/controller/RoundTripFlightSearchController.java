@@ -38,7 +38,9 @@ public class RoundTripFlightSearchController {
                                                 @RequestParam("arrival") String arrivalAirport,
                                                 @RequestParam("departureDate") String departureDateStr,
                                                 @RequestParam("returnDate") String returnDateStr,
-                                                @RequestParam("numberOfAdult") Integer adultCount) {
+                                                @RequestParam("numberOfAdult") Integer adultCount,
+                                                @RequestParam(value = "currency", defaultValue = "EUR")
+                                                        String currency) {
 
         LocalDate departureDate = LocalDate.parse(departureDateStr, DateTimeFormatter.ISO_DATE);
         LocalDate returnDate = LocalDate.parse(returnDateStr, DateTimeFormatter.ISO_DATE);
@@ -55,7 +57,8 @@ public class RoundTripFlightSearchController {
 
         final FlightSearchCriteria searchCriteria =
                 FlightSearchCriteria.builder().addSlice(outwardJourney).addSlice(returnJourney).adultCount(adultCount)
-                        .ticketingCountries(Arrays.asList("FR", "CA", "US", "CH", "NL", "GB")).build();
+                        .ticketingCountries(Arrays.asList("FR", "CA", "US", "CH", "NL", "GB")).currency(currency)
+                        .build();
 
         final QPXResponse qpxResponse = queryService(searchCriteria);
 

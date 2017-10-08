@@ -10,17 +10,24 @@ public class Price {
 
     private Double amount;
 
+    private String requestCurrency;
+
+    private Double requestCurrencyAmount;
+
     private String country;
 
     public Price() {
         this.id = UUID.randomUUID().toString();
     }
 
-    public Price(String currency, Double amount, String country) {
+    private Price(String currency, Double amount, String country, String requestCurrency,
+                  Double requestCurrencyAmount) {
         this();
         this.currency = currency;
         this.amount = amount;
         this.country = country;
+        this.requestCurrency = requestCurrency;
+        this.requestCurrencyAmount = requestCurrencyAmount;
     }
 
     public static Builder builder() {
@@ -55,11 +62,29 @@ public class Price {
         return id;
     }
 
+    public String getRequestCurrency() {
+        return requestCurrency;
+    }
+
+    public void setRequestCurrency(String requestCurrency) {
+        this.requestCurrency = requestCurrency;
+    }
+
+    public Double getRequestCurrencyAmount() {
+        return requestCurrencyAmount;
+    }
+
+    public void setRequestCurrencyAmount(Double requestCurrencyAmount) {
+        this.requestCurrencyAmount = requestCurrencyAmount;
+    }
+
     public static class Builder {
 
         private String currency;
         private Double amount;
         private String country;
+        private String requestCurrency;
+        private Double requestCurrencyAmount;
 
         public Builder currency(String currency) {
             this.currency = currency;
@@ -76,8 +101,19 @@ public class Price {
             return this;
         }
 
+        public Builder requestCurrency(String requestCurrency) {
+            this.requestCurrency = requestCurrency;
+            return this;
+        }
+
+        public Builder requestCurrencyAmount(Double requestCurrencyAmount) {
+            this.requestCurrencyAmount = requestCurrencyAmount;
+            return this;
+        }
+
+
         public Price build() {
-            return new Price(currency, amount, country);
+            return new Price(currency, amount, country, requestCurrency, requestCurrencyAmount);
         }
     }
 }
