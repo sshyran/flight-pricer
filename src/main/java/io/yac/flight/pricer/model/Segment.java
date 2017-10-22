@@ -9,7 +9,7 @@ public class Segment {
 
     private Integer duration;
 
-    private String carrierIATA;
+    private String airline;
 
     private String number;
 
@@ -37,12 +37,12 @@ public class Segment {
         this.duration = duration;
     }
 
-    public String getCarrierIATA() {
-        return carrierIATA;
+    public String getAirline() {
+        return airline;
     }
 
-    public void setCarrierIATA(String carrierIATA) {
-        this.carrierIATA = carrierIATA;
+    public void setAirline(String airline) {
+        this.airline = airline;
     }
 
     public String getNumber() {

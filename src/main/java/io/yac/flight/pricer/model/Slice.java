@@ -3,7 +3,9 @@ package io.yac.flight.pricer.model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class Slice {
     private final String id;
@@ -32,12 +34,15 @@ public class Slice {
         return id;
     }
 
+    public Integer getDuration() {
+        return duration;
+    }
 
     public void setDuration(Integer duration) {
         this.duration = duration;
     }
 
-    public Integer getDuration() {
-        return duration;
+    public Set<String> getAirlinesIATA() {
+        return segments.stream().map(Segment::getAirline).collect(Collectors.toSet());
     }
 }

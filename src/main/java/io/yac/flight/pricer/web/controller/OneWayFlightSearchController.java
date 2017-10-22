@@ -3,6 +3,7 @@ package io.yac.flight.pricer.web.controller;
 import io.yac.flight.pricer.model.*;
 import io.yac.flight.pricer.qpx.QPXResponse;
 import io.yac.flight.pricer.search.MultiCountrySearchHandler;
+import io.yac.flight.pricer.web.resources.Airline;
 import io.yac.flight.pricer.web.resources.FlightSearchCriteria;
 import io.yac.flight.pricer.web.resources.OneWayFlightSearchResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/oneWayFlightSearches")
@@ -54,6 +56,9 @@ public class OneWayFlightSearchController {
         response.setOrigin(departureAirport);
         response.setDestination(arrivalAirport);
         response.setDepartureDate(date);
+        response.setAirlines(qpxResponse.getCarriers().stream().map(c -> new Airline(c.getIata(), c.getName())).collect(
+                Collectors.toList()));
+
         return response;
     }
 
@@ -76,7 +81,7 @@ public class OneWayFlightSearchController {
             Slice slice = new Slice();
 
             Segment segment = new Segment();
-            segment.setCarrierIATA("AF");
+            segment.setAirline("AF");
             segment.setConnectionDuration(0);
             segment.setMarriedSegmentGroup("0");
             segment.setCabin(Cabin.ECONOMY);

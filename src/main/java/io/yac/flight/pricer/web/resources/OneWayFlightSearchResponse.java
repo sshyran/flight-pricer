@@ -10,6 +10,7 @@ public class OneWayFlightSearchResponse {
     private String origin;
     private String destination;
     private String departureDate;
+    private List<Airline> airlines;
 
 
     private List<Solution> solutions;
@@ -48,5 +49,13 @@ public class OneWayFlightSearchResponse {
 
     public String getId() {
         return origin + "-" + destination + "-" + departureDate;
+    }
+
+    public List<Airline> getAirlines() {
+        return airlines;
+    }
+
+    public void setAirlines(List<Airline> airlines) {
+        this.airlines = airlines;
     }
 }

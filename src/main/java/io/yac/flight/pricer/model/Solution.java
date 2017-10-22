@@ -1,8 +1,6 @@
 package io.yac.flight.pricer.model;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 public class Solution {
     private final String id;
@@ -10,6 +8,8 @@ public class Solution {
     private List<Price> prices = new ArrayList<>();
 
     private List<Slice> slices;
+
+    private Set<String> airlines = new HashSet<>();
 
     private boolean isRefundable;
 
@@ -35,6 +35,8 @@ public class Solution {
 
     public void setSlices(List<Slice> slices) {
         this.slices = slices;
+        this.airlines = new HashSet<>();
+        slices.forEach(slice -> airlines.addAll(slice.getAirlinesIATA()));
     }
 
     public boolean isRefundable() {
@@ -49,4 +51,7 @@ public class Solution {
         return id;
     }
 
+    public Set<String> getAirlines() {
+        return airlines;
+    }
 }

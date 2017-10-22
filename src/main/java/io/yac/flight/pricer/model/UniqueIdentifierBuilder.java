@@ -5,7 +5,7 @@ public class UniqueIdentifierBuilder {
     public static String buildUniqueFlightIdentifiers(Solution solution) {
         final StringBuilder uniqueFlightIdentifierBuilder = new StringBuilder();
         solution.getSlices().forEach(slice -> slice.getSegments()
-                .forEach(segment -> uniqueFlightIdentifierBuilder.append(segment.getCarrierIATA())
+                .forEach(segment -> uniqueFlightIdentifierBuilder.append(segment.getAirline())
                         .append(segment.getNumber()).append(segment.getCabin())));
         return uniqueFlightIdentifierBuilder.toString();
     }

@@ -12,6 +12,7 @@ public class RoundTripFlightSearchResponse {
     private String departureDate;
     private String returnDate;
 
+    private List<Airline> airlines;
 
     private List<Solution> solutions;
 
@@ -57,5 +58,13 @@ public class RoundTripFlightSearchResponse {
 
     public void setReturnDate(String returnDate) {
         this.returnDate = returnDate;
+    }
+
+    public List<Airline> getAirlines() {
+        return airlines;
+    }
+
+    public void setAirlines(List<Airline> airlines) {
+        this.airlines = airlines;
     }
 }
