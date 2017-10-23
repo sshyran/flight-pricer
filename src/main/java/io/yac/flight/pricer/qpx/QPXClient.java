@@ -177,6 +177,7 @@ public class QPXClient implements SearchFlightService {
                     segment.setBookingCodeAvailableSeats(segmentInfo.getBookingCodeCount());
                     segment.setCabin(Cabin.fromQpxResponse(segmentInfo.getCabin()));
                     segment.setAirline(segmentInfo.getFlight().getCarrier());
+                    segment.setDuration(segmentInfo.getDuration());
                     segment.setFlightNumber(segmentInfo.getFlight().getNumber());
                     segment.setMarriedSegmentGroup(segmentInfo.getMarriedSegmentGroup());
                     segment.setConnectionDuration(segmentInfo.getConnectionDuration());
