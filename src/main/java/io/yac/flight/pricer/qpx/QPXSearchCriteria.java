@@ -24,7 +24,7 @@ public class QPXSearchCriteria {
     public static QPXSearchCriteria from(FlightSearchCriteria searchCriteria) {
         return new QPXSearchCriteria(searchCriteria.getAdultCount(), searchCriteria.getChildCount(),
                 searchCriteria.getSlices().stream()
-                        .map(sliceSearchCriteria -> QPXSliceSearchCriteria.from(sliceSearchCriteria)).collect(
+                        .map(QPXSliceSearchCriteria::from).collect(
                         Collectors.toList()),
                 searchCriteria.getMaximumSolutions());
     }

@@ -1,5 +1,6 @@
 package io.yac.flight.pricer.qpx;
 
+import io.yac.flight.pricer.model.Cabin;
 import io.yac.flight.pricer.model.SliceSearchCriteria;
 
 import java.time.LocalDate;
@@ -7,10 +8,10 @@ import java.time.LocalDate;
 public class QPXSliceSearchCriteria {
     private final String origin;
     private final String destination;
-    private final String cabin;
+    private final Cabin cabin;
     private final LocalDate departureDate;
 
-    private QPXSliceSearchCriteria(String origin, String destination, String cabin, LocalDate departureDate) {
+    private QPXSliceSearchCriteria(String origin, String destination, Cabin cabin, LocalDate departureDate) {
         this.origin = origin;
         this.destination = destination;
         this.cabin = cabin;
@@ -30,7 +31,7 @@ public class QPXSliceSearchCriteria {
         return destination;
     }
 
-    public String getCabin() {
+    public Cabin getCabin() {
         return cabin;
     }
 

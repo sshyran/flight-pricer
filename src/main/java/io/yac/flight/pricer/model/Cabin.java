@@ -3,7 +3,8 @@ package io.yac.flight.pricer.model;
 import java.util.Arrays;
 
 public enum Cabin {
-    ECONOMY("COACH", "COACH"), PREMIUM("PREMIUM_COACH", "PREMIUM"), BUSINESS("BUSINESS", "BUSINESS"), FIRST("FIRST", "FIRST");
+    ECONOMY("COACH", "ECONOMY"), PREMIUM("PREMIUM_COACH", "PREMIUM"), BUSINESS("BUSINESS", "BUSINESS"), FIRST("FIRST",
+            "FIRST");
 
     private final String qpxValue;
     private final String externalValue;
@@ -18,7 +19,12 @@ public enum Cabin {
                 .orElseThrow(() -> new IllegalArgumentException("Unsupported cabin " + cabin));
     }
 
-    String getQpxValue() {
+    public static Cabin fromExternalValue(String externalValue) {
+        return Arrays.stream(Cabin.values()).filter(c -> c.externalValue.equalsIgnoreCase(externalValue)).findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Unsupported cabin " + externalValue));
+    }
+
+    public String getQpxValue() {
         return qpxValue;
     }
 

@@ -1,5 +1,6 @@
 package io.yac.flight.pricer.web.controller;
 
+import io.yac.flight.pricer.model.Cabin;
 import io.yac.flight.pricer.model.SliceSearchCriteria;
 import io.yac.flight.pricer.qpx.QPXResponse;
 import io.yac.flight.pricer.search.MultiCountrySearchHandler;
@@ -35,13 +36,17 @@ public class OneWayFlightSearchController {
                                              @RequestParam("arrival") String arrivalAirport,
                                              @RequestParam("departureDate") String date,
                                              @RequestParam("numberOfAdult") Integer adultCount,
-                                             @RequestParam(name = "currency", defaultValue = "EUR") String currency) {
+                                             @RequestParam(value = "numberOfChildren", defaultValue = "0") Integer childrenCount,
+                                             @RequestParam(name = "currency", defaultValue = "EUR") String currency,
+                                             @RequestParam(name = "travelClass", defaultValue = "Economy")
+                                                     String travelClass) {
 
         LocalDate departureDate = LocalDate.parse(date, DateTimeFormatter.ISO_DATE);
         final FlightSearchCriteria searchCriteria = FlightSearchCriteria.builder().addSlice(
                 SliceSearchCriteria.builder().origin(departureAirport).destination(arrivalAirport)
                         .departureDate(departureDate)
-                        .build()).adultCount(adultCount)
+                        .cabin(Cabin.fromExternalValue(travelClass))
+                        .build()).adultCount(adultCount).childCount(childrenCount)
                 .ticketingCountries(Arrays.asList("FR", "CA", "US", "CH", "NL", "GB")).currency(currency).build();
 
         final QPXResponse qpxResponse = queryService(searchCriteria);

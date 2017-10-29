@@ -1,5 +1,6 @@
 package io.yac.flight.pricer.web.controller;
 
+import io.yac.flight.pricer.model.Cabin;
 import io.yac.flight.pricer.model.SliceSearchCriteria;
 import io.yac.flight.pricer.qpx.QPXResponse;
 import io.yac.flight.pricer.search.MultiCountrySearchHandler;
@@ -36,24 +37,30 @@ public class RoundTripFlightSearchController {
                                                 @RequestParam("departureDate") String departureDateStr,
                                                 @RequestParam("returnDate") String returnDateStr,
                                                 @RequestParam("numberOfAdult") Integer adultCount,
+                                                @RequestParam(value = "numberOfChildren", defaultValue = "0")
+                                                        Integer childCount,
                                                 @RequestParam(value = "currency", defaultValue = "EUR")
-                                                        String currency) {
+                                                        String currency,
+                                                @RequestParam(name = "travelClass", defaultValue = "Economy")
+                                                        String travelClass) {
 
         LocalDate departureDate = LocalDate.parse(departureDateStr, DateTimeFormatter.ISO_DATE);
         LocalDate returnDate = LocalDate.parse(returnDateStr, DateTimeFormatter.ISO_DATE);
 
+        Cabin cabin = Cabin.fromExternalValue(travelClass);
         final SliceSearchCriteria outwardJourney =
                 SliceSearchCriteria.builder().origin(departureAirport).destination(arrivalAirport)
-                        .departureDate(departureDate)
+                        .departureDate(departureDate).cabin(cabin)
                         .build();
 
         final SliceSearchCriteria returnJourney =
                 SliceSearchCriteria.builder().origin(arrivalAirport).destination(departureAirport)
-                        .departureDate(returnDate).build();
+                        .departureDate(returnDate).cabin(cabin).build();
 
 
         final FlightSearchCriteria searchCriteria =
                 FlightSearchCriteria.builder().addSlice(outwardJourney).addSlice(returnJourney).adultCount(adultCount)
+                        .childCount(childCount)
                         .ticketingCountries(Arrays.asList("FR", "CA", "US", "CH", "NL", "GB")).currency(currency)
                         .build();
 

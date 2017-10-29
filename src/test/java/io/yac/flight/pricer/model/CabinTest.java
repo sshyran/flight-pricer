@@ -25,4 +25,19 @@ class CabinTest {
                 assertThrows(IllegalArgumentException.class, () -> Cabin.fromQpxResponse("any"));
         assertEquals("Unsupported cabin any", exception.getMessage());
     }
+
+    @ParameterizedTest
+    @EnumSource(Cabin.class)
+    @DisplayName("FromExternalValue returns the cabin with the matching qpx value if existing")
+    void testFromExternalValueSuccess(Cabin cabin) {
+        assertEquals(cabin, Cabin.fromExternalValue(cabin.getExternalValue()));
+    }
+
+    @Test
+    @DisplayName("FromExternalValue throws illegalArgumentException if there is no cabin with the matching qpx name")
+    void testFromExternalValueFailure() {
+        IllegalArgumentException exception =
+                assertThrows(IllegalArgumentException.class, () -> Cabin.fromExternalValue("any"));
+        assertEquals("Unsupported cabin any", exception.getMessage());
+    }
 }

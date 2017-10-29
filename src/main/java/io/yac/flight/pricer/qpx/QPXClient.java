@@ -60,7 +60,7 @@ public class QPXClient implements SearchFlightService {
             SliceInput sliceInput = new SliceInput();
             sliceInput.setOrigin(slice.getOrigin());
             sliceInput.setDestination(slice.getDestination());
-            sliceInput.setPreferredCabin(slice.getCabin());
+            sliceInput.setPreferredCabin(slice.getCabin().getQpxValue());
             sliceInput.setDate(slice.getDepartureDate().format(DateTimeFormatter.ISO_LOCAL_DATE));
             slices.add(sliceInput);
         }

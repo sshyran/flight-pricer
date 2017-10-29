@@ -5,10 +5,10 @@ import java.time.LocalDate;
 public class SliceSearchCriteria {
     private final String origin;
     private final String destination;
-    private final String cabin;
+    private final Cabin cabin;
     private LocalDate departureDate;
 
-    private SliceSearchCriteria(String origin, String destination, String cabin, LocalDate departureDate) {
+    private SliceSearchCriteria(String origin, String destination, Cabin cabin, LocalDate departureDate) {
         this.origin = origin;
         this.destination = destination;
         this.cabin = cabin;
@@ -27,7 +27,7 @@ public class SliceSearchCriteria {
         return destination;
     }
 
-    public String getCabin() {
+    public Cabin getCabin() {
         return cabin;
     }
 
@@ -38,7 +38,7 @@ public class SliceSearchCriteria {
     public static class Builder {
         private String origin;
         private String destination;
-        private String cabin;
+        private Cabin cabin;
         private LocalDate departureDate;
 
         public Builder origin(String origin) {
@@ -51,7 +51,7 @@ public class SliceSearchCriteria {
             return this;
         }
 
-        public Builder cabin(String cabin) {
+        public Builder cabin(Cabin cabin) {
             this.cabin = cabin;
             return this;
         }
